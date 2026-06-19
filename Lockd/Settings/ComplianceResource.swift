@@ -68,3 +68,38 @@ enum ComplianceResource: String, CaseIterable, Identifiable {
         }
     }
 }
+
+enum ComplianceSection: String, CaseIterable, Identifiable {
+    case privacyLegal
+    case dataRights
+    case accessSafety
+    case subscription
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .privacyLegal:
+            return "Privacy & Legal"
+        case .dataRights:
+            return "Data Rights"
+        case .accessSafety:
+            return "Access & Safety"
+        case .subscription:
+            return "Subscription"
+        }
+    }
+
+    var resources: [ComplianceResource] {
+        switch self {
+        case .privacyLegal:
+            return [.privacyPolicy, .termsOfService]
+        case .dataRights:
+            return [.privacyRights, .deleteLocalData]
+        case .accessSafety:
+            return [.accessibility, .medicalDisclaimer]
+        case .subscription:
+            return [.subscriptionTerms]
+        }
+    }
+}

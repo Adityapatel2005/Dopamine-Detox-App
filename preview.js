@@ -50,31 +50,57 @@ const apps = [
 const complianceResources = [
   {
     title: 'Privacy Policy',
+    section: 'Privacy & Legal',
     subtitle: 'Local-first focus data, no tracking, no third-party analytics.'
   },
   {
     title: 'Terms of Service',
+    section: 'Privacy & Legal',
     subtitle: 'Focus tool terms with Apple In-App Purchase for Lockd Pro.'
   },
   {
     title: 'Privacy Rights',
+    section: 'Data Rights',
     subtitle: 'GDPR, California, access, correction, and deletion rights.'
   },
   {
     title: 'Delete Local Data',
+    section: 'Data Rights',
     subtitle: 'Remove on-device sessions, rules, predictions, goals, and recaps.'
   },
   {
     title: 'Accessibility',
+    section: 'Access & Safety',
     subtitle: 'VoiceOver, Dynamic Type, Reduced Motion, and 44 pt touch targets.'
   },
   {
     title: 'Subscription Terms',
+    section: 'Subscription',
     subtitle: 'Pricing, trial, renewal, restore, and cancellation details.'
   },
   {
     title: 'Medical Disclaimer',
+    section: 'Access & Safety',
     subtitle: 'Lockd is not medical advice and does not treat health conditions.'
+  }
+];
+
+const policySections = [
+  {
+    title: 'Privacy & Legal',
+    resources: ['Privacy Policy', 'Terms of Service']
+  },
+  {
+    title: 'Data Rights',
+    resources: ['Privacy Rights', 'Delete Local Data']
+  },
+  {
+    title: 'Access & Safety',
+    resources: ['Accessibility', 'Medical Disclaimer']
+  },
+  {
+    title: 'Subscription',
+    resources: ['Subscription Terms']
   }
 ];
 
@@ -131,6 +157,10 @@ function openComplianceResource(resourceTitle) {
   if (resource) {
     setState({ selectedResource: resource, sheet: 'resource' });
   }
+}
+
+function openPolicyCenter() {
+  setState({ selectedResource: null, sheet: 'policyCenter' });
 }
 
 function closeSheet() {
@@ -334,17 +364,36 @@ function renderSheet() {
         <span class="label-stack"><span class="line-title">Focus Score privacy</span><span class="line-subtitle">Private by default.</span></span>
         <span class="pill protected">On</span>
       </div>
-      <h3 class="sheet-section-title">Privacy & legal</h3>
-      ${complianceResources.map((resource) => `
-        <button class="setting-line legal-row" data-action="resource" data-resource="${resource.title}" aria-label="View ${resource.title}">
-          <span class="label-stack">
-            <span class="line-title">${resource.title}</span>
-            <span class="line-subtitle">${resource.subtitle}</span>
-          </span>
-          <span class="pill">View</span>
-        </button>
-      `).join('')}
+      <h3 class="sheet-section-title">Policies</h3>
+      <button class="setting-line legal-row" data-action="policy-center" aria-label="Open Policies & Compliance">
+        <span class="label-stack">
+          <span class="line-title">Policies & Compliance</span>
+          <span class="line-subtitle">Privacy, terms, data rights, accessibility, subscriptions, and safety.</span>
+        </span>
+        <span class="pill">Open</span>
+      </button>
       <button class="secondary-button" data-action="close-sheet">Done</button>
+    `,
+    policyCenter: `
+      <h2>Policies & Compliance</h2>
+      <p class="subcopy" style="margin-top: 8px">Review Lockd's policy, privacy, data rights, safety, accessibility, and subscription details.</p>
+      ${policySections.map((section) => `
+        <h3 class="sheet-section-title">${section.title}</h3>
+        ${section.resources.map((resourceTitle) => {
+          const resource = complianceResources.find((item) => item.title === resourceTitle);
+          return `
+            <button class="setting-line legal-row" data-action="resource" data-resource="${resource.title}" aria-label="View ${resource.title}">
+              <span class="label-stack">
+                <span class="line-title">${resource.title}</span>
+                <span class="line-subtitle">${resource.subtitle}</span>
+              </span>
+              <span class="pill">View</span>
+            </button>
+          `;
+        }).join('')}
+      `).join('')}
+      <button class="ghost-button" data-action="settings" style="margin-top: 10px">Back to Settings</button>
+      <button class="secondary-button" data-action="close-sheet" style="margin-top: 10px">Done</button>
     `,
     resource: `
       <h2>${selectedResource.title}</h2>
@@ -358,7 +407,7 @@ function renderSheet() {
           <span class="pill protected">Active</span>
         </div>
       </div>
-      <button class="ghost-button" data-action="settings" style="margin-top: 10px">Back to Settings</button>
+      <button class="ghost-button" data-action="policy-center" style="margin-top: 10px">Back to Policies</button>
       <button class="secondary-button" data-action="close-sheet" style="margin-top: 10px">Done</button>
     `,
     paywall: `
@@ -433,6 +482,7 @@ document.addEventListener('click', (event) => {
   const action = actionTarget.dataset.action;
   if (action === 'next-onboarding') nextOnboarding();
   if (action === 'settings') setState({ sheet: 'settings' });
+  if (action === 'policy-center') openPolicyCenter();
   if (action === 'start-lock') startLockIn();
   if (action === 'complete-session') completeSession();
   if (action === 'rescue') setState({ sheet: 'rescue' });

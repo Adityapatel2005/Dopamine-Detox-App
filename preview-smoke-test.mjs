@@ -23,6 +23,11 @@ assert.match(js, /renderInsights/);
 assert.match(js, /startLockIn/);
 assert.match(js, /selectedResource/);
 assert.match(js, /openComplianceResource/);
+assert.match(js, /openPolicyCenter/);
+assert.match(js, /policySections/);
 assert.match(js, /data-resource/);
+assert.match(js, /policyCenter/);
+assert.match(js, /Policies & Compliance/);
+assert.match(js, /Data Rights/);
 
 console.log('preview smoke test passed');

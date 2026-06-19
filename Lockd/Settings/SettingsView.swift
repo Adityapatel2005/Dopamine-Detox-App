@@ -13,20 +13,22 @@ struct SettingsView: View {
                         Label("Family Controls entitlement comes before release", systemImage: "checkmark.seal")
                     }
 
-                    Section("Privacy & Legal") {
-                        complianceRow(.privacyPolicy)
-                        complianceRow(.termsOfService)
-                        complianceRow(.privacyRights)
-                        complianceRow(.deleteLocalData)
-                    }
-
-                    Section("Access & Safety") {
-                        complianceRow(.accessibility)
-                        complianceRow(.medicalDisclaimer)
-                    }
-
-                    Section("Subscription") {
-                        complianceRow(.subscriptionTerms)
+                    Section("Policies & Compliance") {
+                        NavigationLink {
+                            ComplianceCenterView()
+                        } label: {
+                            Label {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Policies & Compliance")
+                                    Text("Privacy, terms, data rights, accessibility, subscriptions, and safety.")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: "doc.text.magnifyingglass")
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -38,6 +40,27 @@ struct SettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(.dark)
+    }
+}
+
+private struct ComplianceCenterView: View {
+    var body: some View {
+        ZStack {
+            LockdTheme.background.ignoresSafeArea()
+            List {
+                ForEach(ComplianceSection.allCases) { section in
+                    Section(section.title) {
+                        ForEach(section.resources) { resource in
+                            complianceRow(resource)
+                        }
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+        }
+        .navigationTitle("Policies")
+        .navigationBarTitleDisplayMode(.inline)
         .preferredColorScheme(.dark)
     }
 

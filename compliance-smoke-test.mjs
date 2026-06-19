@@ -60,8 +60,15 @@ assert.match(project, /PrivacyInfo\.xcprivacy/);
 
 const settings = read('Lockd/Settings/SettingsView.swift');
 assert.match(settings, /ComplianceResource/);
-assert.match(settings, /deleteLocalData/);
-assert.match(settings, /privacyRights/);
+assert.match(settings, /ComplianceSection/);
+assert.match(settings, /Section\("Policies & Compliance"\)/);
+assert.match(settings, /NavigationLink/);
+assert.match(settings, /ComplianceCenterView/);
+
+const settingsRoot = settings.split('private struct ComplianceCenterView')[0];
+assert.doesNotMatch(settingsRoot, /Section\("Privacy & Legal"\)/);
+assert.doesNotMatch(settingsRoot, /Section\("Access & Safety"\)/);
+assert.doesNotMatch(settingsRoot, /Section\("Subscription"\)/);
 
 const resource = read('Lockd/Settings/ComplianceResource.swift');
 assert.match(resource, /privacyPolicy/);
@@ -69,10 +76,17 @@ assert.match(resource, /termsOfService/);
 assert.match(resource, /medicalDisclaimer/);
 assert.match(resource, /Delete Local Data/);
 assert.match(resource, /Privacy Rights/);
+assert.match(resource, /Privacy & Legal/);
+assert.match(resource, /Data Rights/);
+assert.match(resource, /Access & Safety/);
+assert.match(resource, /Subscription/);
 
 const preview = read('preview.js');
 assert.match(preview, /Privacy Policy/);
 assert.match(preview, /Terms of Service/);
 assert.match(preview, /Delete Local Data/);
+assert.match(preview, /policySections/);
+assert.match(preview, /openPolicyCenter/);
+assert.match(preview, /Policies & Compliance/);
 
 console.log('compliance smoke test passed');

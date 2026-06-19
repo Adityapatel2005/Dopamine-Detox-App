@@ -21,4 +21,11 @@ final class ComplianceResourceTests: XCTestCase {
     func testDeleteLocalDataExplainsOnDeviceStorage() {
         XCTAssertTrue(ComplianceResource.deleteLocalData.subtitle.localizedCaseInsensitiveContains("on-device"))
     }
+
+    func testComplianceSectionsGroupPolicyResources() {
+        XCTAssertEqual(ComplianceSection.privacyLegal.resources, [.privacyPolicy, .termsOfService])
+        XCTAssertEqual(ComplianceSection.dataRights.resources, [.privacyRights, .deleteLocalData])
+        XCTAssertEqual(ComplianceSection.accessSafety.resources, [.accessibility, .medicalDisclaimer])
+        XCTAssertEqual(ComplianceSection.subscription.resources, [.subscriptionTerms])
+    }
 }
