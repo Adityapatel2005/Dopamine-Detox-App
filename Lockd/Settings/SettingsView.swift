@@ -13,13 +13,20 @@ struct SettingsView: View {
                         Label("Family Controls entitlement comes before release", systemImage: "checkmark.seal")
                     }
 
-                    Section("Privacy") {
-                        Label("Focus Score stays private by default", systemImage: "lock.fill")
-                        Label("Recap cards share only when you choose", systemImage: "square.and.arrow.up")
+                    Section("Privacy & Legal") {
+                        complianceRow(.privacyPolicy)
+                        complianceRow(.termsOfService)
+                        complianceRow(.privacyRights)
+                        complianceRow(.deleteLocalData)
+                    }
+
+                    Section("Access & Safety") {
+                        complianceRow(.accessibility)
+                        complianceRow(.medicalDisclaimer)
                     }
 
                     Section("Subscription") {
-                        Label("Manage Pro after App Store setup", systemImage: "creditcard")
+                        complianceRow(.subscriptionTerms)
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -32,5 +39,19 @@ struct SettingsView: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+
+    private func complianceRow(_ resource: ComplianceResource) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(resource.title)
+                Text(resource.subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } icon: {
+            Image(systemName: resource.systemImage)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
