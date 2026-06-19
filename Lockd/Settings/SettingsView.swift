@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -10,11 +13,21 @@ struct SettingsView: View {
                 LockdTheme.background.ignoresSafeArea()
                 List {
                     Section("Protection") {
-                        Label("Screen Time access is mocked in this build", systemImage: "shield.lefthalf.filled")
-                        Label("Family Controls entitlement comes before release", systemImage: "checkmark.seal")
+                        Label("Screen Time protects selected apps during lock-ins", systemImage: "shield.lefthalf.filled")
+                        Label("Family Controls keeps app selections private on device", systemImage: "checkmark.seal")
                     }
 
                     Section("iPhone Setup") {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Why Lockd needs Screen Time")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Lockd uses Apple's Screen Time and Family Controls permission to block only the apps you select while a lock-in is active.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                        .accessibilityElement(children: .combine)
+
                         statusRow(
                             title: "Screen Time",
                             status: phaseOneViewModel.settings.permissionSnapshot.screenTime,
@@ -27,6 +40,7 @@ struct SettingsView: View {
                         } label: {
                             Label("Request Screen Time Access", systemImage: "person.crop.circle.badge.checkmark")
                         }
+                        .accessibilityHint("Opens Apple's Screen Time permission request for Lockd.")
 
                         statusRow(
                             title: "Notifications",
@@ -40,6 +54,14 @@ struct SettingsView: View {
                         } label: {
                             Label("Request Notification Access", systemImage: "bell.badge.fill")
                         }
+                        .accessibilityHint("Opens Apple's notification permission request for Lockd reminders.")
+
+                        Button {
+                            openAppSettings()
+                        } label: {
+                            Label("Open iPhone Settings", systemImage: "gearshape")
+                        }
+                        .accessibilityHint("Opens the Lockd page in iPhone Settings to review permissions.")
                     }
 
                     Section("Lock Defaults") {
@@ -115,7 +137,13 @@ struct SettingsView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
+    }
+
+    private func openAppSettings() {
+        #if canImport(UIKit)
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(settingsURL)
+        #endif
     }
 
     private func statusRow(title: String, status: LockdPermissionStatus, systemImage: String) -> some View {
@@ -164,7 +192,6 @@ private struct ComplianceCenterView: View {
         }
         .navigationTitle("Policies")
         .navigationBarTitleDisplayMode(.inline)
-        .preferredColorScheme(.dark)
     }
 
     private func complianceRow(_ resource: ComplianceResource) -> some View {

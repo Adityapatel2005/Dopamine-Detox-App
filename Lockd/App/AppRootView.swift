@@ -13,7 +13,6 @@ struct AppRootView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
     }
 }
 

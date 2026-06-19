@@ -3,7 +3,7 @@ import SwiftUI
 import UIKit
 #endif
 
-enum LockdButtonStyle {
+enum LockdButtonStyle: Equatable {
     case primary
     case secondary
     case warning
@@ -14,6 +14,7 @@ struct LockdButton: View {
     let systemImage: String
     let style: LockdButtonStyle
     let isLoading: Bool
+    let accessibilityHint: String?
     let action: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -24,12 +25,14 @@ struct LockdButton: View {
         systemImage: String,
         style: LockdButtonStyle = .primary,
         isLoading: Bool = false,
+        accessibilityHint: String? = nil,
         action: @escaping () -> Void
     ) {
         self.title = title
         self.systemImage = systemImage
         self.style = style
         self.isLoading = isLoading
+        self.accessibilityHint = accessibilityHint
         self.action = action
     }
 
@@ -67,11 +70,16 @@ struct LockdButton: View {
         )
         .animation(reduceMotion ? nil : .spring(response: 0.16, dampingFraction: 0.72), value: isPressed)
         .accessibilityLabel(title)
+        .accessibilityHint(Text(accessibilityHint ?? "Activates \(title)."))
     }
 
     private func triggerHaptic() {
         #if os(iOS)
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        if style == .primary {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } else {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        }
         #endif
     }
 

@@ -16,24 +16,30 @@ struct PaywallView: View {
 
                 ForEach(storeKitController.availablePlans) { plan in
                     pricing(plan)
-                        .onTapGesture {
-                            Task {
-                                await storeKitController.purchase(planID: plan.id)
-                            }
-                        }
                 }
 
                 Text(statusMessage)
                     .font(.footnote)
                     .foregroundStyle(LockdTheme.secondaryText)
 
-                LockdButton("Start 7-day trial", systemImage: "lock.open.fill", isLoading: storeKitController.purchaseState == .loading) {
+                LockdButton(
+                    "Start 7-day trial",
+                    systemImage: "lock.open.fill",
+                    isLoading: storeKitController.purchaseState == .loading,
+                    accessibilityHint: "Starts a trial using the best-value Lockd Pro plan."
+                ) {
                     guard let plan = storeKitController.availablePlans.first(where: { $0.id == LockdProductCatalog.yearlyProductID }) else { return }
                     Task {
                         await storeKitController.purchase(planID: plan.id)
                     }
                 }
-                LockdButton("Restore Purchases", systemImage: "arrow.clockwise", style: .secondary, isLoading: storeKitController.purchaseState == .loading) {
+                LockdButton(
+                    "Restore Purchases",
+                    systemImage: "arrow.clockwise",
+                    style: .secondary,
+                    isLoading: storeKitController.purchaseState == .loading,
+                    accessibilityHint: "Checks App Store purchases and restores Lockd Pro if available."
+                ) {
                     Task {
                         await storeKitController.restorePurchases()
                     }
@@ -41,6 +47,7 @@ struct PaywallView: View {
                 Button("Maybe later", action: onClose)
                     .foregroundStyle(LockdTheme.secondaryText)
                     .frame(maxWidth: .infinity, minHeight: LockdTheme.minimumTouchTarget)
+                    .accessibilityHint("Closes the Pro screen without starting a purchase.")
             }
             .padding(24)
         }
@@ -50,33 +57,44 @@ struct PaywallView: View {
     }
 
     private func pricing(_ plan: LockdSubscriptionPlan) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(plan.displayPrice)
+        Button {
+            Task {
+                await storeKitController.purchase(planID: plan.id)
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(plan.displayPrice)
+                        .font(.headline)
+                        .foregroundStyle(LockdTheme.primaryText)
+                    Spacer()
+                    if plan.isBestValue {
+                        Text("Best value")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(LockdTheme.protectedGreen)
+                            .clipShape(Capsule())
+                    }
+                }
+                Text(plan.title)
                     .font(.headline)
                     .foregroundStyle(LockdTheme.primaryText)
-                Spacer()
-                if plan.isBestValue {
-                    Text("Best value")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(LockdTheme.protectedGreen)
-                        .clipShape(Capsule())
-                }
+                Text(plan.subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(LockdTheme.secondaryText)
             }
-            Text(plan.title)
-                .font(.headline)
-                .foregroundStyle(LockdTheme.primaryText)
-            Text(plan.subtitle)
-                .font(.subheadline)
-                .foregroundStyle(LockdTheme.secondaryText)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(LockdTheme.surface)
+            .clipShape(RoundedRectangle(cornerRadius: LockdTheme.cornerRadius, style: .continuous))
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LockdTheme.surface)
-        .clipShape(RoundedRectangle(cornerRadius: LockdTheme.cornerRadius, style: .continuous))
+        .buttonStyle(.plain)
+        .disabled(storeKitController.purchaseState == .loading)
+        .accessibilityLabel("\(plan.title), \(plan.displayPrice)")
+        .accessibilityValue(plan.subtitle)
+        .accessibilityHint("Purchases this Lockd Pro subscription plan.")
     }
 
     private var statusMessage: String {

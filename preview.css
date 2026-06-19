@@ -60,20 +60,8 @@ button {
   position: relative;
 }
 
-.status-bar {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
 .app-root {
-  height: calc(100% - 44px);
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -463,7 +451,7 @@ h3 {
 
 .sheet-backdrop {
   position: absolute;
-  inset: 44px 0 0;
+  inset: 0;
   display: grid;
   align-items: end;
   background: rgb(0 0 0 / 52%);

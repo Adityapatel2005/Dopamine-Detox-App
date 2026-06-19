@@ -4,6 +4,7 @@ struct ShareCardView: View {
     let score: Int
     let reclaimedHours: Int
     let streakDays: Int
+    @ScaledMetric(relativeTo: .largeTitle) private var scoreFontSize: CGFloat = 64
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -11,9 +12,10 @@ struct ShareCardView: View {
                 .font(.caption.bold())
                 .foregroundStyle(LockdTheme.secondaryText)
             Text("\(score)")
-                .font(.system(size: 64, weight: .black, design: .rounded))
+                .font(.system(size: scoreFontSize, weight: .black, design: .rounded))
                 .foregroundStyle(LockdTheme.protectedGreen)
                 .accessibilityLabel("Share recap Focus Score \(score)")
+                .accessibilityValue("\(score) out of 100")
             Text("\(reclaimedHours) hours reclaimed")
                 .font(.title3.bold())
                 .foregroundStyle(LockdTheme.primaryText)
@@ -33,5 +35,7 @@ struct ShareCardView: View {
             )
         )
         .clipShape(RoundedRectangle(cornerRadius: LockdTheme.cornerRadius, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Preview of the optional recap card you can share.")
     }
 }

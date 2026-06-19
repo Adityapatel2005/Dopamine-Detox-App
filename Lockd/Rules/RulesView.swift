@@ -6,6 +6,7 @@ import FamilyControls
 
 struct RulesView: View {
     @StateObject private var viewModel = RulesViewModel(screenTimeController: RealScreenTimeController())
+    @State private var isShowingPaywall = false
     #if canImport(FamilyControls)
     @State private var isShowingFamilyActivityPicker = false
     @State private var familyActivitySelection = FamilyActivitySelection()
@@ -36,6 +37,17 @@ struct RulesView: View {
                     }
 
                     Section("Screen Time selection") {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Why Lockd needs Screen Time")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(LockdTheme.primaryText)
+                            Text("Screen Time lets Lockd protect the apps you choose during lock-ins. Family Controls keeps the selected app list private to your device.")
+                                .font(.footnote)
+                                .foregroundStyle(LockdTheme.secondaryText)
+                        }
+                        .padding(.vertical, 4)
+                        .accessibilityElement(children: .combine)
+
                         #if canImport(FamilyControls)
                         Button {
                             isShowingFamilyActivityPicker = true
@@ -81,9 +93,9 @@ struct RulesView: View {
                             }
                         }
                         Button("Enable Predictive Protection") {
-                            viewModel.enablePredictiveProtection()
+                            isShowingPaywall = true
                         }
-                        Text("Predictive Protection requires Pro in this mock build.")
+                        Text("Predictive Protection is part of Lockd Pro and uses on-device weak-spot signals to recommend stronger protection.")
                             .foregroundStyle(LockdTheme.secondaryText)
                     }
                 }
@@ -96,6 +108,11 @@ struct RulesView: View {
                 familyActivitySelection = viewModel.loadFamilyActivitySelection()
             }
             #endif
+            .sheet(isPresented: $isShowingPaywall) {
+                PaywallView {
+                    isShowingPaywall = false
+                }
+            }
         }
     }
 }

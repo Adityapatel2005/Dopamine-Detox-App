@@ -3,6 +3,7 @@ import SwiftUI
 struct TodayView: View {
     @StateObject private var viewModel = TodayViewModel()
     @State private var isShowingSettings = false
+    @ScaledMetric(relativeTo: .largeTitle) private var focusScoreFontSize: CGFloat = 72
 
     var body: some View {
         NavigationStack {
@@ -54,10 +55,17 @@ struct TodayView: View {
                 .font(.headline)
                 .foregroundStyle(LockdTheme.secondaryText)
             Text("\(viewModel.focusScore)")
-                .font(.system(size: 72, weight: .black, design: .rounded))
+                .font(.system(size: focusScoreFontSize, weight: .black, design: .rounded))
                 .foregroundStyle(LockdTheme.protectedGreen)
                 .accessibilityLabel("Focus Score \(viewModel.focusScore)")
-            LockdButton(viewModel.buttonTitle, systemImage: "lock.fill", isLoading: viewModel.isApplyingProtection) {
+                .accessibilityValue("\(viewModel.focusScore) out of 100")
+                .accessibilityHint("Higher scores mean more protected time and fewer bypass attempts.")
+            LockdButton(
+                viewModel.buttonTitle,
+                systemImage: "lock.fill",
+                isLoading: viewModel.isApplyingProtection,
+                accessibilityHint: "Starts a protected lock-in using your current rules."
+            ) {
                 viewModel.startLockIn()
             }
         }
@@ -79,6 +87,8 @@ struct TodayView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(LockdTheme.surface)
         .clipShape(RoundedRectangle(cornerRadius: LockdTheme.cornerRadius, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Shows the predicted time when distraction risk is highest.")
     }
 
     private var sessionCard: some View {
@@ -111,5 +121,7 @@ struct TodayView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(LockdTheme.elevatedSurface)
         .clipShape(RoundedRectangle(cornerRadius: LockdTheme.cornerRadius, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Summarizes the current lock-in and rescue attempt status.")
     }
 }
