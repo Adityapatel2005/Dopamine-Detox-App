@@ -25,11 +25,14 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Lockd.entitlements
     dependencies:
       - target: LockdDeviceActivityMonitor
+      - target: LockdShieldConfiguration
+      - target: LockdShieldAction
   LockdDeviceActivityMonitor:
     type: app-extension
     platform: iOS
     sources:
       - path: LockdDeviceActivityMonitorExtension.swift
+      - path: Lockd/ScreenTime/LockdAppGroup.swift
       - path: Lockd/ScreenTime/FamilyActivitySelectionStore.swift
       - path: Lockd/ScreenTime/DeviceActivityScheduleController.swift
       - path: Lockd/ScreenTime/ScreenTimeSelectionState.swift
@@ -40,6 +43,36 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.lockd.app.DeviceActivityMonitor
         INFOPLIST_FILE: LockdDeviceActivityMonitor-Info.plist
         CODE_SIGN_ENTITLEMENTS: LockdDeviceActivityMonitor.entitlements
+  LockdShieldConfiguration:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LockdShieldConfigurationExtension.swift
+      - path: Lockd/ScreenTime/LockdAppGroup.swift
+      - path: Lockd/ScreenTime/ShieldRescueModels.swift
+      - path: Lockd/ScreenTime/ShieldRescueStore.swift
+    info:
+      path: LockdShieldConfiguration-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockd.app.ShieldConfiguration
+        INFOPLIST_FILE: LockdShieldConfiguration-Info.plist
+        CODE_SIGN_ENTITLEMENTS: LockdShieldConfiguration.entitlements
+  LockdShieldAction:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LockdShieldActionExtension.swift
+      - path: Lockd/ScreenTime/LockdAppGroup.swift
+      - path: Lockd/ScreenTime/ShieldRescueModels.swift
+      - path: Lockd/ScreenTime/ShieldRescueStore.swift
+    info:
+      path: LockdShieldAction-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockd.app.ShieldAction
+        INFOPLIST_FILE: LockdShieldAction-Info.plist
+        CODE_SIGN_ENTITLEMENTS: LockdShieldAction.entitlements
   LockdTests:
     type: bundle.unit-test
     platform: iOS

@@ -30,6 +30,8 @@ Status: native scaffold implemented. Final validation still requires macOS, Xcod
 
 Goal: make the blocked-app experience feel like Lockd instead of a generic system wall.
 
+Status: native scaffold implemented. Final validation still requires macOS, Xcode signing, Apple's Family Controls entitlement, and a real iPhone opening a shielded app.
+
 - Add ShieldConfiguration extension for branded blocked-app screens.
 - Add ShieldAction extension for button handling.
 - Support soft friction, hard block, rescue mode, emergency unlock, and bypass attempt tracking.

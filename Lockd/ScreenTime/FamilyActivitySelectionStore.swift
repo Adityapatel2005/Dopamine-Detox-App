@@ -4,10 +4,6 @@ import Foundation
 import FamilyControls
 #endif
 
-enum LockdAppGroup {
-    static let identifier = "group.com.lockd.app"
-}
-
 final class FamilyActivitySelectionStore {
     private enum Keys {
         static let selection = "lockd.phase2.familyActivitySelection"

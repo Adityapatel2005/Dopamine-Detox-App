@@ -31,6 +31,9 @@ struct TodayView: View {
             .sheet(isPresented: $isShowingSettings) {
                 SettingsView()
             }
+            .onAppear {
+                viewModel.refreshRescueState()
+            }
         }
     }
 
@@ -86,6 +89,23 @@ struct TodayView: View {
             Text(viewModel.protectionStatusMessage)
                 .font(.subheadline)
                 .foregroundStyle(LockdTheme.secondaryText)
+
+            Divider()
+                .background(LockdTheme.secondaryText.opacity(0.24))
+                .padding(.vertical, 2)
+
+            Label("Rescue attempts: \(viewModel.bypassAttempts)", systemImage: "hand.raised.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(LockdTheme.primaryText)
+            Text(viewModel.rescueStatusMessage)
+                .font(.footnote)
+                .foregroundStyle(LockdTheme.secondaryText)
+
+            if viewModel.emergencyUnlocks > 0 {
+                Label("Emergency unlock used", systemImage: "exclamationmark.triangle.fill")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(LockdTheme.riskOrange)
+            }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)

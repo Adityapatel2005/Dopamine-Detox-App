@@ -13,6 +13,9 @@ const state = {
   screenTimeStatus: 'Not requested',
   notificationStatus: 'Not requested',
   phase2BlockingStatus: 'Choose apps with FamilyActivityPicker, then start a lock-in.',
+  phase3ShieldStatus: 'ShieldConfiguration will show humane Lockd copy when a selected app is blocked.',
+  bypassAttempts: 0,
+  emergencyUnlocks: 0,
   notificationPreferences: {
     weakSpotWarning: true,
     lockStarted: true,
@@ -180,6 +183,9 @@ function startLockIn() {
     secondsLeft: 25 * 60,
     score: Math.max(state.score, 82),
     phase2BlockingStatus: 'ManagedSettings shields are simulated; DeviceActivityMonitor would clear them on iPhone.',
+    phase3ShieldStatus: 'ShieldActionDelegate is ready to record bypass attempts from the blocked-app shield.',
+    bypassAttempts: 0,
+    emergencyUnlocks: 0,
     sheet: null
   });
   window.clearInterval(timerId);
@@ -191,6 +197,7 @@ function startLockIn() {
         sessionActive: false,
         score: 94,
         phase2BlockingStatus: 'Lock-in completed. Native iOS would remove ManagedSettings shields.',
+        phase3ShieldStatus: 'Shield session ended. Rescue counts remain local for the recap.',
         sheet: 'complete'
       });
       return;
@@ -205,7 +212,37 @@ function completeSession() {
     sessionActive: false,
     score: 94,
     phase2BlockingStatus: 'Lock-in completed. Native iOS would remove ManagedSettings shields.',
+    phase3ShieldStatus: 'Shield session ended. Rescue counts remain local for the recap.',
     sheet: 'complete'
+  });
+}
+
+function recordBypassAttempt() {
+  setState({
+    bypassAttempts: state.bypassAttempts + 1,
+    phase3ShieldStatus: state.hardBlock
+      ? 'Hard block recorded the attempt and kept the shield in place.'
+      : 'Soft shield recorded the attempt and closed the blocked app.'
+  });
+}
+
+function emergencyUnlock() {
+  if (state.hardBlock) {
+    setState({
+      bypassAttempts: state.bypassAttempts + 1,
+      phase3ShieldStatus: 'Hard block does not expose emergency unlock during an active lock-in.',
+      sheet: null
+    });
+    return;
+  }
+
+  window.clearInterval(timerId);
+  setState({
+    sessionActive: false,
+    emergencyUnlocks: state.emergencyUnlocks + 1,
+    phase2BlockingStatus: 'Emergency unlock simulated: native iOS would clear ManagedSettings shields.',
+    phase3ShieldStatus: 'Emergency unlock recorded locally. Lockd treats this as recovery, not failure.',
+    sheet: null
   });
 }
 
@@ -293,6 +330,9 @@ function renderToday() {
   const statusBody = state.sessionActive
     ? 'ManagedSettings shields are active in the iOS build; this localhost preview simulates that state.'
     : state.phase2BlockingStatus;
+  const rescueSummary = state.emergencyUnlocks > 0
+    ? `${state.emergencyUnlocks} emergency unlock${state.emergencyUnlocks === 1 ? '' : 's'} recorded.`
+    : `${state.bypassAttempts} bypass attempt${state.bypassAttempts === 1 ? '' : 's'} paused.`;
 
   return renderShell(`
     ${renderTopbar('Protect the next block.', 'Today')}
@@ -318,6 +358,13 @@ function renderToday() {
         </div>
         <button class="ghost-button" data-action="rescue">Open</button>
       </div>
+      <div class="risk-line">
+        <div class="label-stack">
+          <span class="line-title">Shield UX</span>
+          <span class="line-subtitle">${state.phase3ShieldStatus}</span>
+        </div>
+        <span class="pill ${state.hardBlock ? 'risk' : 'info'}">${state.hardBlock ? 'Hard' : 'Soft'}</span>
+      </div>
     </article>
     <article class="panel" id="session-panel">
       <div class="metric-line">
@@ -326,6 +373,13 @@ function renderToday() {
           <span class="line-subtitle">${statusBody}</span>
         </div>
         <span class="pill ${state.sessionActive ? 'protected' : ''}">${state.sessionActive ? formatTime(state.secondsLeft) : 'Ready'}</span>
+      </div>
+      <div class="metric-line">
+        <div class="label-stack">
+          <span class="line-title">Rescue attempts</span>
+          <span class="line-subtitle">${rescueSummary}</span>
+        </div>
+        <span class="pill">${state.bypassAttempts}</span>
       </div>
       ${state.sessionActive ? '<button class="secondary-button" data-action="complete-session">Finish demo session</button>' : ''}
     </article>
@@ -389,6 +443,22 @@ function renderRules() {
           <span class="line-subtitle">Unlock automatic weak-spot detection.</span>
         </div>
         <button class="switch ${state.predictiveProtection ? 'on' : ''}" data-action="paywall" aria-label="Open Predictive Protection"></button>
+      </div>
+    </article>
+    <article class="panel">
+      <div class="setting-line">
+        <div class="label-stack">
+          <span class="line-title">ShieldConfiguration</span>
+          <span class="line-subtitle">Blocked apps show Lockd copy, color, icon, and button labels.</span>
+        </div>
+        <span class="pill protected">Wired</span>
+      </div>
+      <div class="setting-line">
+        <div class="label-stack">
+          <span class="line-title">ShieldActionDelegate</span>
+          <span class="line-subtitle">Primary closes the blocked app; Emergency unlock clears shields only in soft mode.</span>
+        </div>
+        <span class="pill info">Rescue</span>
       </div>
     </article>
   `);
@@ -464,6 +534,14 @@ function renderSheet() {
       <div class="setting-line">
         <span class="label-stack"><span class="line-title">DeviceActivityMonitor</span><span class="line-subtitle">Scheduled iOS extension clears shields at the end of the lock-in.</span></span>
         <span class="pill protected">Wired</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Phase 3 Shield UX</span><span class="line-subtitle">${state.phase3ShieldStatus}</span></span>
+        <span class="pill info">ShieldConfiguration</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Bypass attempts</span><span class="line-subtitle">${state.bypassAttempts} attempt${state.bypassAttempts === 1 ? '' : 's'}, ${state.emergencyUnlocks} emergency unlock${state.emergencyUnlocks === 1 ? '' : 's'}</span></span>
+        <span class="pill">Local</span>
       </div>
       <div class="setting-line">
         <span class="label-stack"><span class="line-title">Notifications</span><span class="line-subtitle">${state.notificationStatus}</span></span>
@@ -552,11 +630,15 @@ function renderSheet() {
       <button class="ghost-button" data-action="close-sheet" style="margin-top: 10px">Maybe later</button>
     `,
     rescue: `
-      <h2>Rescue mode</h2>
-      <p class="subcopy" style="margin-top: 8px">This is a decision point, not a shame wall.</p>
+      <h2>Protected by Lockd</h2>
+      <p class="subcopy" style="margin-top: 8px">This ShieldConfiguration preview mirrors the native blocked-app screen. This is a decision point, not a shame wall.</p>
+      <div class="panel" style="margin-top: 16px">
+        <div class="metric-line"><span class="line-title">Mode</span><span class="pill ${state.hardBlock ? 'risk' : 'info'}">${state.hardBlock ? 'Hard block' : 'Soft friction'}</span></div>
+        <div class="metric-line"><span class="line-title">Bypass attempts</span><span class="pill">${state.bypassAttempts}</span></div>
+      </div>
       <div class="button-row" style="margin-top: 16px">
-        <button class="secondary-button" data-action="close-sheet">Open anyway</button>
-        <button class="primary-button" data-action="start-lock">15-min lock-in</button>
+        <button class="secondary-button" data-action="emergency-unlock-preview">Emergency unlock</button>
+        <button class="primary-button" data-action="record-bypass">Back to Lockd</button>
       </div>
     `,
     complete: `
@@ -626,7 +708,16 @@ document.addEventListener('click', (event) => {
   if (action === 'start-lock') startLockIn();
   if (action === 'complete-session') completeSession();
   if (action === 'rescue') setState({ sheet: 'rescue' });
-  if (action === 'toggle-hard') setState({ hardBlock: !state.hardBlock });
+  if (action === 'record-bypass') recordBypassAttempt();
+  if (action === 'emergency-unlock-preview') emergencyUnlock();
+  if (action === 'toggle-hard') {
+    setState({
+      hardBlock: !state.hardBlock,
+      phase3ShieldStatus: !state.hardBlock
+        ? 'Hard shield mode saved. Emergency unlock becomes a breathing pause.'
+        : 'Soft shield mode saved. Emergency unlock can clear shields.'
+    });
+  }
   if (action === 'toggle-predictive-preview') setState({ predictiveProtection: !state.predictiveProtection });
   if (action === 'paywall') setState({ sheet: 'paywall' });
   if (action === 'enable-pro') setState({ predictiveProtection: true, sheet: null });

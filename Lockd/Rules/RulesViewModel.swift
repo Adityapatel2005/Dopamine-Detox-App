@@ -17,16 +17,20 @@ final class RulesViewModel: ObservableObject {
 
     private let screenTimeController: ScreenTimeControlling
     private let selectionStore: FamilyActivitySelectionStore
+    private let rescueStore: ShieldRescueStore
 
     init(
         screenTimeController: ScreenTimeControlling,
-        selectionStore: FamilyActivitySelectionStore = FamilyActivitySelectionStore()
+        selectionStore: FamilyActivitySelectionStore = FamilyActivitySelectionStore(),
+        rescueStore: ShieldRescueStore = ShieldRescueStore()
     ) {
         self.screenTimeController = screenTimeController
         self.selectionStore = selectionStore
+        self.rescueStore = rescueStore
         self.entitlementState = screenTimeController.entitlementState
         self.selectionState = selectionStore.loadSelectionState()
         self.selectionMessage = RulesViewModel.message(for: selectionStore.loadSelectionState())
+        self.frictionLevel = rescueStore.loadState().mode == .hard ? .hard : .soft
     }
 
     func chooseApp(_ app: DistractingApp) {
@@ -40,6 +44,8 @@ final class RulesViewModel: ObservableObject {
 
     func setFrictionLevel(_ frictionLevel: FrictionLevel) {
         self.frictionLevel = frictionLevel
+        let mode: ShieldMode = frictionLevel == .hard ? .hard : .soft
+        rescueStore.saveShieldMode(mode)
     }
 
     func enablePredictiveProtection() {

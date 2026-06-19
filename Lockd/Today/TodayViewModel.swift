@@ -8,17 +8,28 @@ final class TodayViewModel: ObservableObject {
     @Published private(set) var activeSession: LockSession?
     @Published private(set) var buttonTitle = "Lock In"
     @Published private(set) var protectionStatusMessage = "Choose apps in Rules, then Lock In to apply iOS Screen Time shields."
+    @Published private(set) var rescueStatusMessage = ShieldRescueState.defaults.statusMessage
+    @Published private(set) var bypassAttempts = 0
+    @Published private(set) var emergencyUnlocks = 0
     @Published private(set) var isApplyingProtection = false
 
     private let screenTimeController: ScreenTimeControlling
+    private let rescueStore: ShieldRescueStore
 
-    init(screenTimeController: ScreenTimeControlling = RealScreenTimeController()) {
+    init(
+        screenTimeController: ScreenTimeControlling = RealScreenTimeController(),
+        rescueStore: ShieldRescueStore = ShieldRescueStore()
+    ) {
         self.screenTimeController = screenTimeController
+        self.rescueStore = rescueStore
+        refreshRescueState()
     }
 
     func startLockIn(durationMinutes: Int = 25) {
         guard !isApplyingProtection else { return }
         isApplyingProtection = true
+        rescueStore.resetSessionRescueState()
+        refreshRescueState()
         buttonTitle = "Locking..."
         protectionStatusMessage = "Applying ManagedSettings shields to your saved Screen Time selection."
 
@@ -33,10 +44,18 @@ final class TodayViewModel: ObservableObject {
         focusScore = 94
         buttonTitle = "+12 Focus Score"
         protectionStatusMessage = "Session completed. Screen Time shields are being cleared."
+        refreshRescueState()
 
         Task {
             try? await screenTimeController.clearActiveBlock()
         }
+    }
+
+    func refreshRescueState() {
+        let state = rescueStore.loadState()
+        rescueStatusMessage = state.statusMessage
+        bypassAttempts = state.bypassAttempts
+        emergencyUnlocks = state.emergencyUnlocks
     }
 
     private func applyBlock(durationMinutes: Int) async {
