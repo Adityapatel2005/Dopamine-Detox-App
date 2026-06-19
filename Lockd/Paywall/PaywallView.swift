@@ -28,6 +28,8 @@ struct PaywallView: View {
                 Text("Start with 7 days free. Then Lockd protects selected apps, weak spots, schedules, insight cards, rescue mode, and recap cards with one subscription.")
                     .foregroundStyle(LockdTheme.secondaryText)
 
+                differentiatorCard
+
                 ForEach(storeKitController.availablePlans) { plan in
                     pricing(plan)
                 }
@@ -123,6 +125,44 @@ struct PaywallView: View {
         .accessibilityLabel("\(plan.title), \(plan.displayPrice)")
         .accessibilityValue(plan.subtitle)
         .accessibilityHint("Purchases this Lockd Pro subscription plan.")
+    }
+
+    private var differentiatorCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Built on Screen Time. Designed for lock-in.")
+                .font(.headline)
+                .foregroundStyle(LockdTheme.primaryText)
+            Text("Screen Time is the engine. Lockd is the behavior layer.")
+                .font(.subheadline)
+                .foregroundStyle(LockdTheme.secondaryText)
+            VStack(alignment: .leading, spacing: 10) {
+                differentiatorRow("Personalized lock-ins", "Start from your triggers, weak spots, targets, and first protected block.", "target")
+                differentiatorRow("Weak-spot protection", "Prepare before your predictable danger windows instead of reacting after the scroll.", "clock.badge.exclamationmark")
+                differentiatorRow("Rescue friction", "Turn bypass moments into a pause that helps you recover without shame.", "hand.raised.fill")
+                differentiatorRow("Progress feedback", "Focus Score, insights, and recaps show what your attention is winning back.", "chart.line.uptrend.xyaxis")
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(LockdTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: LockdTheme.cornerRadius, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+
+    private func differentiatorRow(_ title: String, _ subtitle: String, _ systemImage: String) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LockdTheme.primaryText)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(LockdTheme.secondaryText)
+            }
+        } icon: {
+            Image(systemName: systemImage)
+                .foregroundStyle(LockdTheme.protectedGreen)
+        }
     }
 
     private var statusMessage: String {

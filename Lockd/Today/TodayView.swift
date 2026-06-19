@@ -12,6 +12,7 @@ struct TodayView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
                         header
+                        differentiatorCard
                         scoreCard
                         weakSpotCard
                         sessionCard
@@ -43,9 +44,39 @@ struct TodayView: View {
             Text("Protect the next block.")
                 .font(.largeTitle.bold())
                 .foregroundStyle(LockdTheme.primaryText)
-            Text("Your next weak spot is predictable.")
+            Text("Not just app limits. Screen Time is the engine. Lockd is the behavior layer.")
                 .font(.subheadline)
                 .foregroundStyle(LockdTheme.secondaryText)
+        }
+    }
+
+    private var differentiatorCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            differentiatorRow("Personalized lock-ins", "Start the right block before your trigger takes over.", "target")
+            differentiatorRow("Weak-spot protection", "Lockd highlights the moments where you usually fold.", "clock.badge.exclamationmark")
+            differentiatorRow("Rescue friction", "Bypass attempts become a pause, not a hidden failure.", "hand.raised.fill")
+            differentiatorRow("Progress feedback", "Focus Score shows attention protected, privately.", "chart.line.uptrend.xyaxis")
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(LockdTheme.elevatedSurface)
+        .clipShape(RoundedRectangle(cornerRadius: LockdTheme.cornerRadius, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+
+    private func differentiatorRow(_ title: String, _ subtitle: String, _ systemImage: String) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LockdTheme.primaryText)
+                Text(subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(LockdTheme.secondaryText)
+            }
+        } icon: {
+            Image(systemName: systemImage)
+                .foregroundStyle(LockdTheme.protectedGreen)
         }
     }
 

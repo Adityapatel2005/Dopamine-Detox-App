@@ -510,8 +510,9 @@ function renderOnboarding() {
           <div>
             <p class="kicker">Lockd</p>
             <h1>Your Lockd setup is ready</h1>
-            <p class="subcopy" style="margin-top: 14px">Lockd will start with the pattern you named, then use Apple's Screen Time picker so you can select exact apps, categories, and web domains on iPhone.</p>
+            <p class="subcopy" style="margin-top: 14px">Not another app limit. Screen Time is the engine. Lockd is the behavior layer.</p>
           </div>
+          ${renderDifferentiators('choice-grid')}
           <div class="choice-grid">
             ${rows.map((row) => `
               <div class="choice selected">
@@ -606,6 +607,29 @@ function renderOnboardingAppTargets() {
   `;
 }
 
+function renderDifferentiators(className = 'panel') {
+  return `
+    <article class="${className} differentiator-list">
+      <div class="label-stack">
+        <span class="line-title">Screen Time is the engine. Lockd is the behavior layer.</span>
+        <span class="line-subtitle">Apple handles the private app picker; Lockd adds the system that helps users actually stay locked in.</span>
+      </div>
+      <div class="metric-line">
+        <span class="label-stack"><span class="line-title">Personalized lock-ins</span><span class="line-subtitle">Triggers, weak spots, targets, and first blocks shape the plan.</span></span>
+      </div>
+      <div class="metric-line">
+        <span class="label-stack"><span class="line-title">Weak-spot protection</span><span class="line-subtitle">Prepare before predictable scroll windows instead of reacting after.</span></span>
+      </div>
+      <div class="metric-line">
+        <span class="label-stack"><span class="line-title">Rescue friction</span><span class="line-subtitle">Bypass moments become a recovery pause without shame.</span></span>
+      </div>
+      <div class="metric-line">
+        <span class="label-stack"><span class="line-title">Progress feedback</span><span class="line-subtitle">Focus Score and recaps make protected attention visible.</span></span>
+      </div>
+    </article>
+  `;
+}
+
 function onboardingPlanRows() {
   return [
     ['What you want back', state.onboardingAnswers.outcome?.title ?? 'Protect attention'],
@@ -643,6 +667,7 @@ function renderRequiredPaywall() {
         <div class="metric-line"><span class="line-title">$5.99 / month</span><span class="pill">Monthly</span></div>
         <div class="metric-line"><span class="line-title">Subscription terms</span><span class="line-subtitle">7 days free, then your selected App Store plan renews automatically unless cancelled at least 24 hours before renewal.</span></div>
       </article>
+      ${renderDifferentiators()}
       <button class="primary-button" data-action="enable-pro" style="margin-top: 14px">Start 7-day trial</button>
       <button class="secondary-button" data-action="restore-pro-preview" style="margin-top: 10px">Restore purchases</button>
       <button class="ghost-button" data-action="policy-center" style="margin-top: 10px">Terms and privacy</button>
@@ -685,6 +710,7 @@ function renderToday() {
 
   return renderShell(`
     ${renderTopbar('Protect the next block.', 'Today')}
+    ${renderDifferentiators()}
     <article class="panel score-panel">
       <div>
         <p class="score-caption">Focus Score</p>
@@ -923,7 +949,7 @@ function renderSheet() {
       <div class="setting-line">
         <span class="label-stack">
           <span class="line-title">Why Lockd needs Screen Time</span>
-          <span class="line-subtitle">Lockd uses Apple's Screen Time permission to protect only the apps, categories, and websites you select.</span>
+          <span class="line-subtitle">Screen Time is the engine. Lockd is the behavior layer. Apple provides the private app picker; Lockd turns it into personalized lock-ins, rescue friction, weak-spot protection, and progress feedback.</span>
         </span>
       </div>
       <div class="setting-line">
@@ -937,6 +963,23 @@ function renderSheet() {
       <div class="setting-line">
         <span class="label-stack"><span class="line-title">Open iPhone Settings</span><span class="line-subtitle">Use this if Screen Time or notifications were denied.</span></span>
         <button class="ghost-button inline-action" data-action="request-screen-time-preview">Open</button>
+      </div>
+      <h3 class="sheet-section-title">What Lockd adds beyond Screen Time</h3>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Personalized lock-ins</span><span class="line-subtitle">Rules start from triggers, weak spots, selected targets, and first protected blocks.</span></span>
+        <span class="pill protected">Core</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Weak-spot protection</span><span class="line-subtitle">Predictive windows help users prepare before the scroll starts.</span></span>
+        <span class="pill">Plan</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Rescue friction</span><span class="line-subtitle">Bypass moments become recovery pauses and local rescue counts.</span></span>
+        <span class="pill">Pause</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Progress feedback</span><span class="line-subtitle">Focus Score, insights, and recap cards make protected time visible.</span></span>
+        <span class="pill">Score</span>
       </div>
       <h3 class="sheet-section-title">Protection Defaults</h3>
       <div class="setting-line">

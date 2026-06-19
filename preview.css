@@ -152,6 +152,19 @@ h3 {
   margin-top: 16px;
 }
 
+.differentiator-list {
+  gap: 0;
+}
+
+.panel.differentiator-list {
+  display: grid;
+}
+
+.differentiator-list > .label-stack {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
 .score-panel {
   min-height: 248px;
   display: flex;

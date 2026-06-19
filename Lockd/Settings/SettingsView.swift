@@ -16,7 +16,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Why Lockd needs Screen Time")
                                 .font(.subheadline.weight(.semibold))
-                            Text("Lockd uses Apple's Screen Time and Family Controls permission to block only the apps you select while a lock-in is active.")
+                            Text("Screen Time is the engine. Lockd is the behavior layer. Apple provides the private app picker; Lockd turns it into personalized lock-ins, rescue friction, weak-spot protection, and progress feedback.")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -57,6 +57,29 @@ struct SettingsView: View {
                             Label("Open iPhone Settings", systemImage: "gearshape")
                         }
                         .accessibilityHint("Opens the Lockd page in iPhone Settings to review permissions.")
+                    }
+
+                    Section("What Lockd adds beyond Screen Time") {
+                        settingsSummaryRow(
+                            title: "Personalized lock-ins",
+                            subtitle: "Rules start from the user's triggers, weak spots, selected targets, and first protected block.",
+                            systemImage: "target"
+                        )
+                        settingsSummaryRow(
+                            title: "Weak-spot protection",
+                            subtitle: "Predictive windows help users prepare before the scroll starts.",
+                            systemImage: "clock.badge.exclamationmark"
+                        )
+                        settingsSummaryRow(
+                            title: "Rescue friction",
+                            subtitle: "Bypass moments become recovery pauses and local rescue counts.",
+                            systemImage: "hand.raised.fill"
+                        )
+                        settingsSummaryRow(
+                            title: "Progress feedback",
+                            subtitle: "Focus Score, insights, and recap cards make protected time visible.",
+                            systemImage: "chart.line.uptrend.xyaxis"
+                        )
                     }
 
                     Section("Protection Defaults") {

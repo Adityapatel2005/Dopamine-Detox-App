@@ -461,34 +461,45 @@ struct OnboardingView: View {
                 .minimumScaleFactor(0.74)
                 .accessibilityAddTraits(.isHeader)
 
-            Text("Lockd will start with the pattern you named, then use Apple's Screen Time picker so you can select exact apps, categories, and web domains on iPhone.")
+            Text("Not another app limit. Screen Time is the engine. Lockd is the behavior layer.")
                 .font(.body)
                 .foregroundStyle(LockdTheme.secondaryText)
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(spacing: 10) {
+                ForEach(lockdDifferentiatorRows) { row in
+                    planRow(row)
+                }
+            }
+
+            VStack(spacing: 10) {
                 ForEach(personalizedPlanRows) { row in
-                    Label {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(row.title)
-                                .font(.headline)
-                            Text(row.subtitle)
-                                .font(.footnote)
-                                .foregroundStyle(LockdTheme.secondaryText)
-                        }
-                    } icon: {
-                        Image(systemName: row.systemImage)
-                            .foregroundStyle(LockdTheme.protectedGreen)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
-                    .padding(14)
-                    .background(LockdTheme.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: LockdTheme.compactRadius, style: .continuous))
-                    .accessibilityElement(children: .combine)
+                    planRow(row)
                 }
             }
         }
+    }
+
+    private func planRow(_ row: PersonalizedPlanRow) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(row.title)
+                    .font(.headline)
+                Text(row.subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(LockdTheme.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } icon: {
+            Image(systemName: row.systemImage)
+                .foregroundStyle(LockdTheme.protectedGreen)
+        }
+        .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
+        .padding(14)
+        .background(LockdTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: LockdTheme.compactRadius, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 
     private var footerButton: some View {
@@ -554,6 +565,35 @@ struct OnboardingView: View {
                 title: "First lock",
                 subtitle: onboardingAnswers["firstBlock"]?.title ?? "25 min focus",
                 systemImage: "timer"
+            )
+        ]
+    }
+
+    private var lockdDifferentiatorRows: [PersonalizedPlanRow] {
+        [
+            PersonalizedPlanRow(
+                id: "personalized-lock-ins",
+                title: "Personalized lock-ins",
+                subtitle: "Your first lock starts from the triggers, weak spots, and targets you named.",
+                systemImage: "target"
+            ),
+            PersonalizedPlanRow(
+                id: "weak-spot-protection",
+                title: "Weak-spot protection",
+                subtitle: "Lockd watches the moments where you usually fold, not just a daily app limit.",
+                systemImage: "clock.badge.exclamationmark"
+            ),
+            PersonalizedPlanRow(
+                id: "rescue-friction",
+                title: "Rescue friction",
+                subtitle: "Blocked moments become a recovery pause instead of a shame spiral.",
+                systemImage: "hand.raised"
+            ),
+            PersonalizedPlanRow(
+                id: "progress-feedback",
+                title: "Progress feedback",
+                subtitle: "Focus Score and recaps show what you protected, privately.",
+                systemImage: "chart.line.uptrend.xyaxis"
             )
         ]
     }
