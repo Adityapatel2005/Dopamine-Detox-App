@@ -12,11 +12,6 @@ struct SettingsView: View {
             ZStack {
                 LockdTheme.background.ignoresSafeArea()
                 List {
-                    Section("Protection") {
-                        Label("Screen Time protects selected apps during lock-ins", systemImage: "shield.lefthalf.filled")
-                        Label("Family Controls keeps app selections private on device", systemImage: "checkmark.seal")
-                    }
-
                     Section("iPhone Setup") {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Why Lockd needs Screen Time")
@@ -64,7 +59,19 @@ struct SettingsView: View {
                         .accessibilityHint("Opens the Lockd page in iPhone Settings to review permissions.")
                     }
 
-                    Section("Lock Defaults") {
+                    Section("Protection Defaults") {
+                        settingsSummaryRow(
+                            title: "Screen Time app blocking",
+                            subtitle: "Protects the apps, categories, and websites selected in Apple's picker.",
+                            systemImage: "shield.lefthalf.filled"
+                        )
+
+                        settingsSummaryRow(
+                            title: "Private app selections",
+                            subtitle: "Family Controls stores opaque tokens, not readable app lists.",
+                            systemImage: "checkmark.seal"
+                        )
+
                         Stepper(
                             value: Binding(
                                 get: { phaseOneViewModel.settings.defaultLockDurationMinutes },
@@ -92,13 +99,13 @@ struct SettingsView: View {
                         ))
                     }
 
-                    Section("Notifications") {
+                    Section("Notification Preferences") {
                         ForEach(LockdNotificationKind.allCases) { kind in
                             notificationRow(kind)
                         }
                     }
 
-                    Section("Policies & Compliance") {
+                    Section("Account & Legal") {
                         NavigationLink {
                             ComplianceCenterView()
                         } label: {
@@ -114,10 +121,14 @@ struct SettingsView: View {
                             }
                         }
                         .accessibilityElement(children: .combine)
-                    }
 
-                    if let saveErrorMessage = phaseOneViewModel.saveErrorMessage {
-                        Section("Local Data") {
+                        settingsSummaryRow(
+                            title: "Subscription & purchases",
+                            subtitle: "Lockd Pro purchases and restore flows are handled through Apple's App Store system.",
+                            systemImage: "creditcard"
+                        )
+
+                        if let saveErrorMessage = phaseOneViewModel.saveErrorMessage {
                             Text(saveErrorMessage)
                                 .foregroundStyle(LockdTheme.riskOrange)
                             Button(role: .destructive) {
@@ -144,6 +155,20 @@ struct SettingsView: View {
         guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(settingsURL)
         #endif
+    }
+
+    private func settingsSummaryRow(title: String, subtitle: String, systemImage: String) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                Text(subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } icon: {
+            Image(systemName: systemImage)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private func statusRow(title: String, status: LockdPermissionStatus, systemImage: String) -> some View {

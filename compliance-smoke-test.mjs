@@ -61,7 +61,8 @@ assert.match(project, /PrivacyInfo\.xcprivacy/);
 const settings = read('Lockd/Settings/SettingsView.swift');
 assert.match(settings, /ComplianceResource/);
 assert.match(settings, /ComplianceSection/);
-assert.match(settings, /Section\("Policies & Compliance"\)/);
+assert.match(settings, /Section\("Account & Legal"\)/);
+assert.match(settings, /Policies & Compliance/);
 assert.match(settings, /NavigationLink/);
 assert.match(settings, /ComplianceCenterView/);
 

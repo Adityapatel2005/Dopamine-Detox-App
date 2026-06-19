@@ -63,15 +63,15 @@ assert.match(nativeScreenTime, /individual/);
 const settingsView = read('Lockd/Settings/SettingsView.swift');
 assert.match(settingsView, /PhaseOneSettingsViewModel/);
 assert.match(settingsView, /iPhone Setup/);
-assert.match(settingsView, /Lock Defaults/);
-assert.match(settingsView, /Notifications/);
+assert.match(settingsView, /Protection Defaults/);
+assert.match(settingsView, /Notification Preferences/);
 assert.match(settingsView, /Default duration/);
 
 const preview = read('preview.js');
 assert.match(preview, /notificationPreferences/);
 assert.match(preview, /defaultLockDurationMinutes/);
 assert.match(preview, /iPhone Setup/);
-assert.match(preview, /Lock defaults/);
+assert.match(preview, /Protection Defaults/);
 assert.match(preview, /Weak spot warning/);
 
 console.log('phase 1 smoke test passed');

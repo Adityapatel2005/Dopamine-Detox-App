@@ -2,16 +2,26 @@ import SwiftUI
 
 struct AppRootView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("hasUnlockedPro") private var hasUnlockedPro = false
+    @StateObject private var storeKitController = StoreKitSubscriptionController()
 
     var body: some View {
         Group {
-            if hasCompletedOnboarding {
-                MainTabView()
-            } else {
+            if !hasCompletedOnboarding {
                 OnboardingView {
                     hasCompletedOnboarding = true
                 }
+            } else if hasUnlockedPro || storeKitController.entitlement.unlocksAdvancedInsights {
+                MainTabView()
+            } else {
+                PaywallView(storeKitController: storeKitController, allowsDismissal: false, onPurchased: {
+                    hasUnlockedPro = true
+                })
             }
+        }
+        .task {
+            await storeKitController.refreshCurrentEntitlements()
+            hasUnlockedPro = storeKitController.entitlement.unlocksAdvancedInsights
         }
     }
 }

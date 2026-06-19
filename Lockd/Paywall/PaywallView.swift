@@ -1,17 +1,31 @@
 import SwiftUI
 
 struct PaywallView: View {
+    let allowsDismissal: Bool
+    let onPurchased: () -> Void
     let onClose: () -> Void
-    @StateObject private var storeKitController = StoreKitSubscriptionController()
+    @ObservedObject private var storeKitController: StoreKitSubscriptionController
+
+    init(
+        storeKitController: StoreKitSubscriptionController = StoreKitSubscriptionController(),
+        allowsDismissal: Bool = true,
+        onPurchased: @escaping () -> Void = {},
+        onClose: @escaping () -> Void = {}
+    ) {
+        _storeKitController = ObservedObject(wrappedValue: storeKitController)
+        self.allowsDismissal = allowsDismissal
+        self.onPurchased = onPurchased
+        self.onClose = onClose
+    }
 
     var body: some View {
         ZStack {
             LockdTheme.background.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 18) {
-                Text("Unlock Predictive Protection")
+                Text("Your Lockd plan is ready")
                     .font(.largeTitle.bold())
                     .foregroundStyle(LockdTheme.primaryText)
-                Text("Automatic weak-spot detection, unlimited lock-ins, advanced schedules, weekly insight cards, premium recap cards, and challenge packs.")
+                Text("Start with 7 days free. Then Lockd protects selected apps, weak spots, schedules, insight cards, rescue mode, and recap cards with one subscription.")
                     .foregroundStyle(LockdTheme.secondaryText)
 
                 ForEach(storeKitController.availablePlans) { plan in
@@ -26,7 +40,7 @@ struct PaywallView: View {
                     "Start 7-day trial",
                     systemImage: "lock.open.fill",
                     isLoading: storeKitController.purchaseState == .loading,
-                    accessibilityHint: "Starts a trial using the best-value Lockd Pro plan."
+                    accessibilityHint: "Starts the 7-day Lockd trial using the best-value plan."
                 ) {
                     guard let plan = storeKitController.availablePlans.first(where: { $0.id == LockdProductCatalog.yearlyProductID }) else { return }
                     Task {
@@ -44,15 +58,26 @@ struct PaywallView: View {
                         await storeKitController.restorePurchases()
                     }
                 }
-                Button("Maybe later", action: onClose)
+                Text("7 days free, then your selected App Store plan renews automatically unless cancelled at least 24 hours before renewal.")
+                    .font(.caption)
                     .foregroundStyle(LockdTheme.secondaryText)
-                    .frame(maxWidth: .infinity, minHeight: LockdTheme.minimumTouchTarget)
-                    .accessibilityHint("Closes the Pro screen without starting a purchase.")
+
+                if allowsDismissal {
+                    Button("Close", action: onClose)
+                        .foregroundStyle(LockdTheme.secondaryText)
+                        .frame(maxWidth: .infinity, minHeight: LockdTheme.minimumTouchTarget)
+                        .accessibilityHint("Closes the subscription screen.")
+                }
             }
             .padding(24)
         }
         .task {
             await storeKitController.loadProducts()
+        }
+        .onChange(of: storeKitController.purchaseState) { newValue in
+            if newValue == .purchased {
+                onPurchased()
+            }
         }
     }
 
@@ -83,6 +108,9 @@ struct PaywallView: View {
                     .foregroundStyle(LockdTheme.primaryText)
                 Text(plan.subtitle)
                     .font(.subheadline)
+                    .foregroundStyle(LockdTheme.secondaryText)
+                Text(plan.isBestValue ? "7 days free, then yearly billing." : "7 days free, then monthly billing.")
+                    .font(.caption)
                     .foregroundStyle(LockdTheme.secondaryText)
             }
             .padding(16)
