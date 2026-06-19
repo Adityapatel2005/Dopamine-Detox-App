@@ -222,6 +222,29 @@ h3 {
   border: 1px solid var(--line);
 }
 
+.inline-action {
+  width: auto;
+  min-width: 82px;
+  white-space: nowrap;
+}
+
+.stepper-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper-button {
+  width: 36px;
+  min-height: 36px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  color: var(--text);
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .button-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

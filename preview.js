@@ -7,8 +7,20 @@ const state = {
   secondsLeft: 25 * 60,
   selectedApps: ['TikTok', 'Instagram', 'YouTube'],
   goal: 'Cut brain rot',
+  defaultLockDurationMinutes: 25,
   hardBlock: false,
   predictiveProtection: false,
+  screenTimeStatus: 'Not requested',
+  notificationStatus: 'Not requested',
+  notificationPreferences: {
+    weakSpotWarning: true,
+    lockStarted: true,
+    lockEndingSoon: true,
+    lockCompleted: true,
+    rescueNudge: true,
+    dailyPlan: false,
+    weeklyRecap: true
+  },
   selectedResource: null,
   sheet: null
 };
@@ -45,6 +57,44 @@ const apps = [
   ['YouTube', 'play.rectangle'],
   ['Reddit', 'bubble.left'],
   ['Safari', 'safari']
+];
+
+const notificationOptions = [
+  {
+    key: 'weakSpotWarning',
+    title: 'Weak spot warning',
+    subtitle: 'A risky scroll window is coming up.'
+  },
+  {
+    key: 'lockStarted',
+    title: 'Lock-in started',
+    subtitle: 'Confirm selected apps are protected.'
+  },
+  {
+    key: 'lockEndingSoon',
+    title: 'Lock-in ending soon',
+    subtitle: 'A calm heads-up before the block ends.'
+  },
+  {
+    key: 'lockCompleted',
+    title: 'Lock-in completed',
+    subtitle: 'Private progress feedback after a protected block.'
+  },
+  {
+    key: 'rescueNudge',
+    title: 'Rescue nudge',
+    subtitle: 'A short pause after a bypass attempt.'
+  },
+  {
+    key: 'dailyPlan',
+    title: 'Daily plan',
+    subtitle: 'Optional daily reminder to choose a focus block.'
+  },
+  {
+    key: 'weeklyRecap',
+    title: 'Weekly recap',
+    subtitle: 'A private weekly summary when it is ready.'
+  }
 ];
 
 const complianceResources = [
@@ -150,6 +200,20 @@ function toggleApp(appName) {
     selected.add(appName);
   }
   setState({ selectedApps: [...selected] });
+}
+
+function adjustDefaultDuration(delta) {
+  const nextDuration = Math.min(180, Math.max(5, state.defaultLockDurationMinutes + delta));
+  setState({ defaultLockDurationMinutes: nextDuration });
+}
+
+function toggleNotificationPreference(kind) {
+  setState({
+    notificationPreferences: {
+      ...state.notificationPreferences,
+      [kind]: !state.notificationPreferences[kind]
+    }
+  });
 }
 
 function openComplianceResource(resourceTitle) {
@@ -355,15 +419,41 @@ function renderSheet() {
   const sheets = {
     settings: `
       <h2>Settings</h2>
-      <h3 class="sheet-section-title">Protection</h3>
+      <h3 class="sheet-section-title">iPhone Setup</h3>
       <div class="setting-line">
-        <span class="label-stack"><span class="line-title">Screen Time access</span><span class="line-subtitle">Mocked in this Windows preview.</span></span>
-        <span class="pill">Preview</span>
+        <span class="label-stack"><span class="line-title">Screen Time</span><span class="line-subtitle">${state.screenTimeStatus}</span></span>
+        <button class="ghost-button inline-action" data-action="request-screen-time-preview">Request</button>
       </div>
       <div class="setting-line">
-        <span class="label-stack"><span class="line-title">Focus Score privacy</span><span class="line-subtitle">Private by default.</span></span>
-        <span class="pill protected">On</span>
+        <span class="label-stack"><span class="line-title">Notifications</span><span class="line-subtitle">${state.notificationStatus}</span></span>
+        <button class="ghost-button inline-action" data-action="request-notifications-preview">Request</button>
       </div>
+      <h3 class="sheet-section-title">Lock defaults</h3>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Default duration</span><span class="line-subtitle">${state.defaultLockDurationMinutes} minutes</span></span>
+        <span class="stepper-control" aria-label="Default duration controls">
+          <button class="stepper-button" data-action="decrease-duration" aria-label="Decrease default duration">-</button>
+          <button class="stepper-button" data-action="increase-duration" aria-label="Increase default duration">+</button>
+        </span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Hard block</span><span class="line-subtitle">Use stricter friction during lock-ins.</span></span>
+        <button class="switch ${state.hardBlock ? 'on' : ''}" data-action="toggle-hard" aria-label="Toggle hard block"></button>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Predictive Protection</span><span class="line-subtitle">Prepare weak-spot warnings for Pro.</span></span>
+        <button class="switch ${state.predictiveProtection ? 'on' : ''}" data-action="toggle-predictive-preview" aria-label="Toggle Predictive Protection"></button>
+      </div>
+      <h3 class="sheet-section-title">Notifications</h3>
+      ${notificationOptions.map((option) => `
+        <div class="setting-line">
+          <span class="label-stack">
+            <span class="line-title">${option.title}</span>
+            <span class="line-subtitle">${option.subtitle}</span>
+          </span>
+          <button class="switch ${state.notificationPreferences[option.key] ? 'on' : ''}" data-action="toggle-notification" data-kind="${option.key}" aria-label="Toggle ${option.title}"></button>
+        </div>
+      `).join('')}
       <h3 class="sheet-section-title">Policies</h3>
       <button class="setting-line legal-row" data-action="policy-center" aria-label="Open Policies & Compliance">
         <span class="label-stack">
@@ -483,14 +573,20 @@ document.addEventListener('click', (event) => {
   if (action === 'next-onboarding') nextOnboarding();
   if (action === 'settings') setState({ sheet: 'settings' });
   if (action === 'policy-center') openPolicyCenter();
+  if (action === 'request-screen-time-preview') setState({ screenTimeStatus: 'Requires real iPhone and Family Controls' });
+  if (action === 'request-notifications-preview') setState({ notificationStatus: 'Allowed in preview' });
+  if (action === 'increase-duration') adjustDefaultDuration(5);
+  if (action === 'decrease-duration') adjustDefaultDuration(-5);
   if (action === 'start-lock') startLockIn();
   if (action === 'complete-session') completeSession();
   if (action === 'rescue') setState({ sheet: 'rescue' });
   if (action === 'toggle-hard') setState({ hardBlock: !state.hardBlock });
+  if (action === 'toggle-predictive-preview') setState({ predictiveProtection: !state.predictiveProtection });
   if (action === 'paywall') setState({ sheet: 'paywall' });
   if (action === 'enable-pro') setState({ predictiveProtection: true, sheet: null });
   if (action === 'share') setState({ sheet: 'share' });
   if (action === 'resource') openComplianceResource(actionTarget.dataset.resource);
+  if (action === 'toggle-notification') toggleNotificationPreference(actionTarget.dataset.kind);
   if (action === 'close-sheet') closeSheet();
   if (action === 'toggle-app') toggleApp(actionTarget.dataset.app);
 });
