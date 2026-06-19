@@ -14,6 +14,8 @@ const state = {
   notificationStatus: 'Not requested',
   phase2BlockingStatus: 'Choose apps with FamilyActivityPicker, then start a lock-in.',
   phase3ShieldStatus: 'ShieldConfiguration will show humane Lockd copy when a selected app is blocked.',
+  phase4InsightStatus: 'DeviceActivityReport will generate privacy-preserving weekly insights on iPhone.',
+  proEntitlement: 'free',
   bypassAttempts: 0,
   emergencyUnlocks: 0,
   notificationPreferences: {
@@ -246,6 +248,23 @@ function emergencyUnlock() {
   });
 }
 
+function enableProPreview() {
+  setState({
+    predictiveProtection: true,
+    proEntitlement: 'pro',
+    phase4InsightStatus: 'StoreKit 2 purchase simulated. currentEntitlements now unlock advanced insights.',
+    sheet: null
+  });
+}
+
+function restorePurchasesPreview() {
+  setState({
+    proEntitlement: 'pro',
+    phase4InsightStatus: 'AppStore.sync and Transaction.currentEntitlements restore simulated.',
+    sheet: null
+  });
+}
+
 function toggleApp(appName) {
   const selected = new Set(state.selectedApps);
   if (selected.has(appName)) {
@@ -465,27 +484,55 @@ function renderRules() {
 }
 
 function renderInsights() {
+  const advancedLocked = state.proEntitlement !== 'pro';
+  const focusScore = state.score + 4;
+  const reclaimedHours = state.sessionActive ? 12 : 11;
+  const protectedStreak = state.proEntitlement === 'pro' ? 6 : 5;
+
   return renderShell(`
     ${renderTopbar('Weekly control', 'Insights')}
     <article class="panel">
       <div class="metric-line">
         <span class="line-title">Weekly Focus Score</span>
-        <span class="pill protected">${state.score + 4}</span>
+        <span class="pill protected">${focusScore}</span>
       </div>
       <div class="metric-line">
         <span class="line-title">Time reclaimed</span>
-        <span class="pill info">11h</span>
+        <span class="pill info">${reclaimedHours}h</span>
       </div>
       <div class="metric-line">
         <span class="line-title">Protected streak</span>
-        <span class="pill risk">5d</span>
+        <span class="pill risk">${protectedStreak}d</span>
+      </div>
+      <div class="metric-line">
+        <div class="label-stack">
+          <span class="line-title">DeviceActivityReport</span>
+          <span class="line-subtitle">${state.phase4InsightStatus}</span>
+        </div>
+        <span class="pill ${advancedLocked ? '' : 'protected'}">${advancedLocked ? 'Locked' : 'Pro'}</span>
+      </div>
+    </article>
+    <article class="panel">
+      <div class="setting-line">
+        <div class="label-stack">
+          <span class="line-title">Next weak spot</span>
+          <span class="line-subtitle">${advancedLocked ? 'Advanced weak-spot prediction requires Lockd Pro.' : 'Night drift windows are your highest-risk pattern.'}</span>
+        </div>
+        <button class="ghost-button inline-action" data-action="${advancedLocked ? 'paywall' : 'share'}">${advancedLocked ? 'Unlock' : 'Save'}</button>
+      </div>
+      <div class="setting-line">
+        <div class="label-stack">
+          <span class="line-title">StoreKit 2 entitlement</span>
+          <span class="line-subtitle">Transaction.currentEntitlements gates predictive protection and advanced insights.</span>
+        </div>
+        <span class="pill info">${state.proEntitlement}</span>
       </div>
     </article>
     <article class="share-card" aria-label="Share recap preview">
       <p class="kicker">LOCKD RECAP</p>
-      <div class="share-score">${state.score + 4}</div>
-      <h2>11 hours reclaimed</h2>
-      <p class="subcopy" style="margin-top: 6px">5-day protected streak</p>
+      <div class="share-score">${focusScore}</div>
+      <h2>${reclaimedHours} hours reclaimed</h2>
+      <p class="subcopy" style="margin-top: 6px">${protectedStreak}-day protected streak</p>
       <p class="fine-print" style="margin-top: 22px">Private by default. Shared only when you choose.</p>
     </article>
     <div class="button-row">
@@ -538,6 +585,14 @@ function renderSheet() {
       <div class="setting-line">
         <span class="label-stack"><span class="line-title">Phase 3 Shield UX</span><span class="line-subtitle">${state.phase3ShieldStatus}</span></span>
         <span class="pill info">ShieldConfiguration</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Phase 4 Insights</span><span class="line-subtitle">${state.phase4InsightStatus}</span></span>
+        <span class="pill info">DeviceActivityReport</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Pro entitlement</span><span class="line-subtitle">StoreKit 2 currentEntitlements controls Pro gates.</span></span>
+        <span class="pill ${state.proEntitlement === 'pro' ? 'protected' : ''}">${state.proEntitlement}</span>
       </div>
       <div class="setting-line">
         <span class="label-stack"><span class="line-title">Bypass attempts</span><span class="line-subtitle">${state.bypassAttempts} attempt${state.bypassAttempts === 1 ? '' : 's'}, ${state.emergencyUnlocks} emergency unlock${state.emergencyUnlocks === 1 ? '' : 's'}</span></span>
@@ -625,8 +680,11 @@ function renderSheet() {
       <div class="panel" style="margin-top: 16px">
         <div class="metric-line"><span class="line-title">$39.99 / year</span><span class="pill protected">7-day trial</span></div>
         <div class="metric-line"><span class="line-title">$5.99 / month</span><span class="pill">Monthly</span></div>
+        <div class="metric-line"><span class="line-title">StoreKit 2</span><span class="pill info">Product.products</span></div>
+        <div class="metric-line"><span class="line-title">Restore</span><span class="pill info">currentEntitlements</span></div>
       </div>
       <button class="primary-button" data-action="enable-pro" style="margin-top: 14px">Start 7-day trial</button>
+      <button class="secondary-button" data-action="restore-pro-preview" style="margin-top: 10px">Restore purchases</button>
       <button class="ghost-button" data-action="close-sheet" style="margin-top: 10px">Maybe later</button>
     `,
     rescue: `
@@ -720,7 +778,8 @@ document.addEventListener('click', (event) => {
   }
   if (action === 'toggle-predictive-preview') setState({ predictiveProtection: !state.predictiveProtection });
   if (action === 'paywall') setState({ sheet: 'paywall' });
-  if (action === 'enable-pro') setState({ predictiveProtection: true, sheet: null });
+  if (action === 'enable-pro') enableProPreview();
+  if (action === 'restore-pro-preview') restorePurchasesPreview();
   if (action === 'share') setState({ sheet: 'share' });
   if (action === 'resource') openComplianceResource(actionTarget.dataset.resource);
   if (action === 'toggle-notification') toggleNotificationPreference(actionTarget.dataset.kind);

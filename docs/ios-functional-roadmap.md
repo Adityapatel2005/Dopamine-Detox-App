@@ -42,6 +42,8 @@ Status: native scaffold implemented. Final validation still requires macOS, Xcod
 
 Goal: turn protected sessions into useful progress and paid Pro capabilities.
 
+Status: native scaffold implemented. Final validation still requires macOS, Xcode signing, StoreKit products in App Store Connect, and a real iPhone for DeviceActivityReport output.
+
 - Add DeviceActivityReport extension for privacy-preserving usage reports.
 - Compute Focus Score from completed sessions, protected minutes, bypass attempts, and weak-spot windows.
 - Add local weak-spot prediction based on historical sessions and usage signals.

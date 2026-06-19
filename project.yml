@@ -27,6 +27,7 @@ targets:
       - target: LockdDeviceActivityMonitor
       - target: LockdShieldConfiguration
       - target: LockdShieldAction
+      - target: LockdDeviceActivityReport
   LockdDeviceActivityMonitor:
     type: app-extension
     platform: iOS
@@ -73,6 +74,19 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.lockd.app.ShieldAction
         INFOPLIST_FILE: LockdShieldAction-Info.plist
         CODE_SIGN_ENTITLEMENTS: LockdShieldAction.entitlements
+  LockdDeviceActivityReport:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LockdDeviceActivityReportExtension.swift
+      - path: Lockd/Insights/DeviceActivityReportModels.swift
+    info:
+      path: LockdDeviceActivityReport-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockd.app.DeviceActivityReport
+        INFOPLIST_FILE: LockdDeviceActivityReport-Info.plist
+        CODE_SIGN_ENTITLEMENTS: LockdDeviceActivityReport.entitlements
   LockdTests:
     type: bundle.unit-test
     platform: iOS
