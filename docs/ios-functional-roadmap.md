@@ -17,11 +17,13 @@ Goal: prepare the app for real device functionality without claiming live blocki
 
 Goal: make lock-ins actually block selected apps, app categories, and web domains on a real iPhone.
 
+Status: native scaffold implemented. Final validation still requires macOS, Xcode signing, Apple's Family Controls entitlement, and a real iPhone.
+
 - Add Family Controls entitlement and App Groups in Apple Developer and Xcode signing.
-- Replace sample app rows with Apple's FamilyActivityPicker.
+- Replace sample app rows with Apple's FamilyActivityPicker flow.
 - Persist FamilyActivitySelection tokens in shared App Group storage.
-- Use ManagedSettingsStore to shield selected applications, categories, and web domains.
-- Add DeviceActivityMonitor extension so schedules apply even when the main app is closed.
+- Use ManagedSettingsStore to shield selected applications, categories, and web domains during lock-ins.
+- Add DeviceActivityMonitor extension so schedules clear shields when the protected window ends.
 - Handle permission denied, revoked authorization, no selected apps, device reboot, and expired sessions.
 
 ## Phase 3: Shield UX and Rescue

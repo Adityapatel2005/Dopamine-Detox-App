@@ -22,6 +22,24 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.lockd.app
         INFOPLIST_FILE: Lockd/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Lockd.entitlements
+    dependencies:
+      - target: LockdDeviceActivityMonitor
+  LockdDeviceActivityMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LockdDeviceActivityMonitorExtension.swift
+      - path: Lockd/ScreenTime/FamilyActivitySelectionStore.swift
+      - path: Lockd/ScreenTime/DeviceActivityScheduleController.swift
+      - path: Lockd/ScreenTime/ScreenTimeSelectionState.swift
+    info:
+      path: LockdDeviceActivityMonitor-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lockd.app.DeviceActivityMonitor
+        INFOPLIST_FILE: LockdDeviceActivityMonitor-Info.plist
+        CODE_SIGN_ENTITLEMENTS: LockdDeviceActivityMonitor.entitlements
   LockdTests:
     type: bundle.unit-test
     platform: iOS

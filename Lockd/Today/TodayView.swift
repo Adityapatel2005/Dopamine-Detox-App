@@ -54,7 +54,7 @@ struct TodayView: View {
                 .font(.system(size: 72, weight: .black, design: .rounded))
                 .foregroundStyle(LockdTheme.protectedGreen)
                 .accessibilityLabel("Focus Score \(viewModel.focusScore)")
-            LockdButton(viewModel.buttonTitle, systemImage: "lock.fill") {
+            LockdButton(viewModel.buttonTitle, systemImage: "lock.fill", isLoading: viewModel.isApplyingProtection) {
                 viewModel.startLockIn()
             }
         }
@@ -83,7 +83,7 @@ struct TodayView: View {
             Text(viewModel.activeSession == nil ? "No session active" : "Protected mode active")
                 .font(.headline)
                 .foregroundStyle(LockdTheme.primaryText)
-            Text(viewModel.activeSession == nil ? "Start with a 25-minute lock-in." : "Your selected apps are guarded by the mock Screen Time adapter.")
+            Text(viewModel.protectionStatusMessage)
                 .font(.subheadline)
                 .foregroundStyle(LockdTheme.secondaryText)
         }

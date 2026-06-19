@@ -12,6 +12,7 @@ const state = {
   predictiveProtection: false,
   screenTimeStatus: 'Not requested',
   notificationStatus: 'Not requested',
+  phase2BlockingStatus: 'Choose apps with FamilyActivityPicker, then start a lock-in.',
   notificationPreferences: {
     weakSpotWarning: true,
     lockStarted: true,
@@ -174,13 +175,24 @@ function nextOnboarding() {
 }
 
 function startLockIn() {
-  setState({ sessionActive: true, secondsLeft: 25 * 60, score: Math.max(state.score, 82), sheet: null });
+  setState({
+    sessionActive: true,
+    secondsLeft: 25 * 60,
+    score: Math.max(state.score, 82),
+    phase2BlockingStatus: 'ManagedSettings shields are simulated; DeviceActivityMonitor would clear them on iPhone.',
+    sheet: null
+  });
   window.clearInterval(timerId);
   timerId = window.setInterval(() => {
     state.secondsLeft = Math.max(0, state.secondsLeft - 1);
     if (state.secondsLeft === 0) {
       window.clearInterval(timerId);
-      setState({ sessionActive: false, score: 94, sheet: 'complete' });
+      setState({
+        sessionActive: false,
+        score: 94,
+        phase2BlockingStatus: 'Lock-in completed. Native iOS would remove ManagedSettings shields.',
+        sheet: 'complete'
+      });
       return;
     }
     renderTodayOnly();
@@ -189,7 +201,12 @@ function startLockIn() {
 
 function completeSession() {
   window.clearInterval(timerId);
-  setState({ sessionActive: false, score: 94, sheet: 'complete' });
+  setState({
+    sessionActive: false,
+    score: 94,
+    phase2BlockingStatus: 'Lock-in completed. Native iOS would remove ManagedSettings shields.',
+    sheet: 'complete'
+  });
 }
 
 function toggleApp(appName) {
@@ -274,8 +291,8 @@ function renderToday() {
   const lockLabel = state.sessionActive ? 'Protected' : 'Lock In';
   const status = state.sessionActive ? 'Protected mode active' : 'No session active';
   const statusBody = state.sessionActive
-    ? 'Your selected apps are guarded by the mock Screen Time adapter.'
-    : 'Start with a 25-minute lock-in.';
+    ? 'ManagedSettings shields are active in the iOS build; this localhost preview simulates that state.'
+    : state.phase2BlockingStatus;
 
   return renderShell(`
     ${renderTopbar('Protect the next block.', 'Today')}
@@ -324,6 +341,22 @@ function renderTodayOnly() {
 function renderRules() {
   return renderShell(`
     ${renderTopbar('Rules', `${state.selectedApps.length} apps selected`)}
+    <article class="panel">
+      <div class="setting-line">
+        <div class="label-stack">
+          <span class="line-title">FamilyActivityPicker</span>
+          <span class="line-subtitle">Native iOS opens Apple's app/category/web-domain picker and saves opaque tokens.</span>
+        </div>
+        <span class="pill info">Phase 2</span>
+      </div>
+      <div class="setting-line">
+        <div class="label-stack">
+          <span class="line-title">Saved Screen Time selection</span>
+          <span class="line-subtitle">${state.selectedApps.length} app tokens shown in preview; iPhone uses app-group storage.</span>
+        </div>
+        <span class="pill protected">${state.selectedApps.length}</span>
+      </div>
+    </article>
     <article class="panel">
       ${apps.map(([name, symbol]) => `
         <button class="app-line choice ${state.selectedApps.includes(name) ? 'selected' : ''}" data-action="toggle-app" data-app="${name}">
@@ -423,6 +456,14 @@ function renderSheet() {
       <div class="setting-line">
         <span class="label-stack"><span class="line-title">Screen Time</span><span class="line-subtitle">${state.screenTimeStatus}</span></span>
         <button class="ghost-button inline-action" data-action="request-screen-time-preview">Request</button>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">Phase 2 Blocking</span><span class="line-subtitle">${state.phase2BlockingStatus}</span></span>
+        <span class="pill info">ManagedSettings</span>
+      </div>
+      <div class="setting-line">
+        <span class="label-stack"><span class="line-title">DeviceActivityMonitor</span><span class="line-subtitle">Scheduled iOS extension clears shields at the end of the lock-in.</span></span>
+        <span class="pill protected">Wired</span>
       </div>
       <div class="setting-line">
         <span class="label-stack"><span class="line-title">Notifications</span><span class="line-subtitle">${state.notificationStatus}</span></span>
@@ -573,7 +614,12 @@ document.addEventListener('click', (event) => {
   if (action === 'next-onboarding') nextOnboarding();
   if (action === 'settings') setState({ sheet: 'settings' });
   if (action === 'policy-center') openPolicyCenter();
-  if (action === 'request-screen-time-preview') setState({ screenTimeStatus: 'Requires real iPhone and Family Controls' });
+  if (action === 'request-screen-time-preview') {
+    setState({
+      screenTimeStatus: 'Requires real iPhone and Family Controls',
+      phase2BlockingStatus: 'FamilyActivityPicker, ManagedSettings, and DeviceActivityMonitor are native-only.'
+    });
+  }
   if (action === 'request-notifications-preview') setState({ notificationStatus: 'Allowed in preview' });
   if (action === 'increase-duration') adjustDefaultDuration(5);
   if (action === 'decrease-duration') adjustDefaultDuration(-5);

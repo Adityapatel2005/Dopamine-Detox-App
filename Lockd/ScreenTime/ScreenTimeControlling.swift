@@ -10,4 +10,6 @@ protocol ScreenTimeControlling {
 enum ScreenTimeControllerError: Error, Equatable {
     case unavailable
     case permissionMissing
+    case noSelection
+    case scheduleFailed
 }

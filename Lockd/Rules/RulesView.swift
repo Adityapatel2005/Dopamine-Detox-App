@@ -1,7 +1,16 @@
 import SwiftUI
 
+#if canImport(FamilyControls)
+import FamilyControls
+#endif
+
 struct RulesView: View {
-    @StateObject private var viewModel = RulesViewModel(screenTimeController: MockScreenTimeController(entitlementState: .proRequired))
+    @StateObject private var viewModel = RulesViewModel(screenTimeController: RealScreenTimeController())
+    #if canImport(FamilyControls)
+    @State private var isShowingFamilyActivityPicker = false
+    @State private var familyActivitySelection = FamilyActivitySelection()
+    #endif
+
     private let sampleApps = [
         DistractingApp(name: "TikTok", symbolName: "music.note"),
         DistractingApp(name: "Instagram", symbolName: "camera"),
@@ -24,6 +33,37 @@ struct RulesView: View {
                             }
                             .foregroundStyle(LockdTheme.primaryText)
                         }
+                    }
+
+                    Section("Screen Time selection") {
+                        #if canImport(FamilyControls)
+                        Button {
+                            isShowingFamilyActivityPicker = true
+                        } label: {
+                            Label("Choose apps with Screen Time", systemImage: "lock.shield")
+                        }
+                        .foregroundStyle(LockdTheme.primaryText)
+
+                        Button {
+                            viewModel.saveFamilyActivitySelection(familyActivitySelection)
+                        } label: {
+                            Label("Save Screen Time selection", systemImage: "checkmark.shield")
+                        }
+                        .foregroundStyle(LockdTheme.protectedGreen)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("\(viewModel.selectionState.totalSelectionCount) protected items")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(LockdTheme.primaryText)
+                            Text(viewModel.selectionMessage)
+                                .font(.footnote)
+                                .foregroundStyle(LockdTheme.secondaryText)
+                        }
+                        .padding(.vertical, 4)
+                        #else
+                        Text("FamilyActivityPicker requires a real iOS build with Family Controls.")
+                            .foregroundStyle(LockdTheme.secondaryText)
+                        #endif
                     }
 
                     Section("Goal") {
@@ -50,6 +90,12 @@ struct RulesView: View {
                 .scrollContentBackground(.hidden)
             }
             .navigationTitle("Rules")
+            #if canImport(FamilyControls)
+            .familyActivityPicker(isPresented: $isShowingFamilyActivityPicker, selection: $familyActivitySelection)
+            .onAppear {
+                familyActivitySelection = viewModel.loadFamilyActivitySelection()
+            }
+            #endif
         }
     }
 }
